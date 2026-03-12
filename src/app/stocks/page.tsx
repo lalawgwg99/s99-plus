@@ -36,7 +36,8 @@ export default function StockSearchPage() {
     setLoading(true)
     fetchStockInfo()
       .then(data => {
-        const twOnly = data.filter(s => s.type === "股票" || s.type === "ETF" || s.type === "上市" || s.type === "上櫃")
+        // FinMind uses 'twse' (上市) and 'tpex' (上櫃)
+        const twOnly = data.filter(s => s.type === "twse" || s.type === "tpex")
         setStockList(twOnly)
       })
       .catch(() => setError("無法取得股票清單，請確認網路連線"))
