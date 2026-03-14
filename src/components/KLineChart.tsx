@@ -9,8 +9,14 @@ interface Props {
   height?: number
 }
 
+function toDate(dateStr: string): { year: number; month: number; day: number } {
+  const [y, m, d] = dateStr.split("-").map(Number)
+  return { year: y, month: m, day: d }
+}
+
 export default function KLineChart({ data, height = 320 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
+  const chartRef = useRef<ReturnType<typeof createChart> | null>(null)
 
   useEffect(() => {
     if (!containerRef.current || !data.length) return
@@ -31,7 +37,7 @@ export default function KLineChart({ data, height = 320 }: Props) {
       rightPriceScale: { borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)" },
       timeScale: {
         borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
-        timeVisible: true,
+        timeVisible: false,
         secondsVisible: false,
       },
       crosshair: {
@@ -40,6 +46,8 @@ export default function KLineChart({ data, height = 320 }: Props) {
         horzLine: { width: 1, color: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)", style: 2 },
       },
     })
+
+    chartRef.current = chart
 
     // Candlestick series
     const candleSeries = chart.addSeries(CandlestickSeries, {
@@ -52,7 +60,7 @@ export default function KLineChart({ data, height = 320 }: Props) {
     })
 
     const candles = data.map(d => ({
-      time: d.date as any,
+      time: toDate(d.date),
       open: d.open,
       high: d.max,
       low: d.min,
@@ -70,11 +78,9 @@ export default function KLineChart({ data, height = 320 }: Props) {
     })
 
     const volumeData = data.map(d => ({
-      time: d.date as any,
+      time: toDate(d.date),
       value: d.Trading_Volume,
-      color: d.close >= d.open
-        ? "rgba(34,197,94,0.3)"
-        : "rgba(239,68,68,0.3)",
+      color: d.close >= d.open ? "rgba(34,197,94,0.3)" : "rgba(239,68,68,0.3)",
     }))
     volumeSeries.setData(volumeData)
 
@@ -85,10 +91,10 @@ export default function KLineChart({ data, height = 320 }: Props) {
       priceScaleId: "right",
     })
 
-    const maData: { time: any; value: number }[] = []
+    const maData: { time: { year: number; month: number; day: number }; value: number }[] = []
     for (let i = 19; i < data.length; i++) {
       const avg = data.slice(i - 19, i + 1).reduce((s, d) => s + d.close, 0) / 20
-      maData.push({ time: data[i].date as any, value: avg })
+      maData.push({ time: toDate(data[i].date), value: avg })
     }
     maSeries.setData(maData)
 
@@ -98,13 +104,14 @@ export default function KLineChart({ data, height = 320 }: Props) {
     // Resize observer
     const ro = new ResizeObserver(entries => {
       const { width } = entries[0].contentRect
-      chart.applyOptions({ width })
+      if (width > 0) chart.applyOptions({ width })
     })
     ro.observe(containerRef.current)
 
     return () => {
       ro.disconnect()
       chart.remove()
+      chartRef.current = null
     }
   }, [data, height])
 

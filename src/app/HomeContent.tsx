@@ -1,21 +1,15 @@
 "use client"
 
-import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { TrendingUp, TrendingDown, ChevronRight, Newspaper } from "lucide-react"
 import PortfolioPie from "@/components/PortfolioPie"
+import { AI_SIGNALS } from "@/lib/signals"
 
 const MARKET_DATA = [
   { label: "加權指數", value: "22,456.82", change: "+1.23%", up: true, sub: "▲ 273.5" },
   { label: "櫃買指數", value: "235.81", change: "-0.31%", up: false, sub: "▼ 0.73" },
   { label: "成交金額", value: "3,245億", change: "+15.2%", up: true, sub: "量能放大" },
   { label: "貪婪指數", value: "72", change: "貪婪", up: true, sub: "偏多情緒" },
-]
-
-const AI_SIGNALS = [
-  { stock: "2330 台積電", risk: "high" as const, msg: "法說會提及 CoWoS 供給 Q3 瓶頸，庫存去化低於預期", source: "Q3 法說會" },
-  { stock: "2317 鴻海", risk: "medium" as const, msg: "連續兩季毛利率下修至 5.8%，匯損擴大", source: "Q2 財報" },
-  { stock: "2412 中華電", risk: "low" as const, msg: "財報穩健，現金流充沛，股利發放穩定逾 20 年", source: "H1 財報" },
 ]
 
 const PORTFOLIO = [
@@ -32,6 +26,9 @@ const riskStyle = {
   low: { dot: "bg-emerald-500", label: "穩定", badge: "bg-emerald-500/10 text-emerald-600" },
 }
 
+// MOCK_DATA — TODO: replace with TWSE API (fetchMarketSummary)
+// MOCK_DATA — TODO: replace with real portfolio data from user's broker API
+
 export default function HomeContent() {
   const totalValue = PORTFOLIO.reduce((s, p) => s + p.value, 0)
 
@@ -43,7 +40,7 @@ export default function HomeContent() {
         <p className="text-[15px] text-muted-foreground mt-1">台股即時數據 · AI 風險掃描 · 持股概覽</p>
       </div>
 
-      {/* Market Overview — iOS Large Cards */}
+      {/* Market Overview — Large Cards */}
       <div className="grid grid-cols-2 gap-3">
         {MARKET_DATA.map(m => (
           <div
@@ -76,8 +73,8 @@ export default function HomeContent() {
           </Button>
         </div>
         <div className="rounded-[20px] bg-card shadow-sm overflow-hidden divide-y divide-border/50">
-          {AI_SIGNALS.map((s, i) => {
-            const style = riskStyle[s.risk]
+          {AI_SIGNALS.slice(0, 3).map((s, i) => {
+            const style = riskStyle[s.riskLevel]
             return (
               <div
                 key={i}
@@ -87,10 +84,10 @@ export default function HomeContent() {
                 <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${style.dot}`} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-[15px] font-semibold">{s.stock}</span>
+                    <span className="text-[15px] font-semibold">{s.stockId} {s.stockName}</span>
                     <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${style.badge}`}>{style.label}</span>
                   </div>
-                  <p className="text-[13px] text-muted-foreground mt-1 line-clamp-2">{s.msg}</p>
+                  <p className="text-[13px] text-muted-foreground mt-1 line-clamp-2">{s.summary}</p>
                   <p className="text-[11px] text-muted-foreground/60 mt-1">{s.source}</p>
                 </div>
                 <ChevronRight className="h-4 w-4 text-muted-foreground/30 shrink-0" />

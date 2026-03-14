@@ -10,10 +10,13 @@ interface Props {
   onSelect?: (stock: StockInfo) => void
 }
 
+// Global cache — only fetch once per session
+let globalStockList: StockInfo[] | null = null
+
 export default function SearchSheet({ open, onClose, onSelect }: Props) {
   const [query, setQuery] = useState("")
   const [loading, setLoading] = useState(false)
-  const [stockList, setStockList] = useState<StockInfo[]>([])
+  const [stockList, setStockList] = useState<StockInfo[]>(globalStockList ?? [])
   const [filtered, setFiltered] = useState<StockInfo[]>([])
   const [sheetY, setSheetY] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -23,11 +26,19 @@ export default function SearchSheet({ open, onClose, onSelect }: Props) {
     if (open) {
       setQuery("")
       setFiltered([])
-      setLoading(true)
-      fetchStockInfo()
-        .then(data => setStockList(data.filter(s => s.type === "twse" || s.type === "tpex")))
-        .catch(() => {})
-        .finally(() => setLoading(false))
+      if (globalStockList) {
+        setStockList(globalStockList)
+      } else {
+        setLoading(true)
+        fetchStockInfo()
+          .then(data => {
+            const filtered = data.filter(s => s.type === "twse" || s.type === "tpex")
+            globalStockList = filtered
+            setStockList(filtered)
+          })
+          .catch(() => {})
+          .finally(() => setLoading(false))
+      }
       setTimeout(() => inputRef.current?.focus(), 300)
     }
   }, [open])
