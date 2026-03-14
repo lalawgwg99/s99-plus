@@ -110,20 +110,20 @@ export default function PortfolioContent() {
   const BRACKETS = [5, 12, 20, 30, 40]
 
   return (
-    <div className="p-4 space-y-5 max-w-2xl mx-auto">
+    <div className="p-5 space-y-6 max-w-3xl mx-auto">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">投資工具</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">ETF 重疊 · 定期定額 DRIP · 股息稅務</p>
+        <h1 className="text-[28px] font-bold tracking-tight">投資工具</h1>
+        <p className="text-[15px] text-muted-foreground mt-1">ETF 重疊 · 定期定額 DRIP · 股息稅務</p>
       </div>
 
-      {/* Tab Switcher */}
-      <div className="flex gap-2 flex-wrap">
+      {/* Tab Switcher — iOS Segmented Control */}
+      <div className="flex bg-secondary/60 rounded-xl p-1">
         {(["etf", "dca", "tax"] as PortTab[]).map(t => (
           <button key={t} onClick={() => { setTab(t); navigator.vibrate?.(10) }}
-            className={`px-4 py-2 rounded-full text-sm font-semibold border transition-all duration-200 ${
-              tab === t ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border hover:border-primary/50"
+            className={`flex-1 py-2 rounded-lg text-[13px] font-semibold transition-all duration-200 ${
+              tab === t ? "bg-card shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
             }`}>
-            {t === "etf" ? "🔬 ETF X-Ray" : t === "dca" ? "📈 DRIP 模擬" : "💰 股息稅務"}
+            {t === "etf" ? "ETF X-Ray" : t === "dca" ? "DRIP 模擬" : "股息稅務"}
           </button>
         ))}
       </div>

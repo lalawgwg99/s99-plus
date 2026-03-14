@@ -13,6 +13,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="zh-Hant" suppressHydrationWarning>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <script dangerouslySetInnerHTML={{ __html: `
+          (function(){
+            try{
+              var t=localStorage.getItem('theme');
+              var d=t?t==='dark':matchMedia('(prefers-color-scheme:dark)').matches;
+              if(d)document.documentElement.classList.add('dark');
+            }catch(e){}
+          })();
+        `}} />
       </head>
       <body className="bg-background text-foreground antialiased min-h-screen">
         <Header />

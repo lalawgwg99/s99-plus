@@ -26,14 +26,14 @@ export default function TabBar() {
               key={tab.href}
               href={tab.href}
               onClick={() => navigator.vibrate?.(10)}
-              className={`flex flex-col items-center justify-center gap-1 px-4 py-1.5 rounded-xl transition-all duration-200 min-w-[64px] ${
+              className={`relative flex flex-col items-center justify-center gap-1.5 px-4 py-1.5 rounded-xl transition-all duration-200 min-w-[64px] ${
                 isActive
                   ? "text-primary"
                   : "text-muted-foreground active:scale-95"
               }`}
             >
               <Icon
-                className={`h-5 w-5 transition-all duration-200 ${
+                className={`h-[22px] w-[22px] transition-all duration-200 ${
                   isActive ? "scale-110" : ""
                 }`}
                 strokeWidth={isActive ? 2.5 : 1.8}
@@ -44,7 +44,7 @@ export default function TabBar() {
                 {tab.label}
               </span>
               {isActive && (
-                <span className="absolute bottom-0 w-6 h-0.5 bg-primary rounded-full transition-all duration-300" />
+                <span className="absolute -bottom-0 w-5 h-[3px] bg-primary rounded-full transition-all duration-300" />
               )}
             </Link>
           )
