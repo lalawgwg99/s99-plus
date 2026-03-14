@@ -2,27 +2,42 @@
 // Docs: https://api.finmindtrade.com/api/v4/
 // Free tier: 600 req/day, 3 req/s — no backend needed, supports CORS
 
+import { getCached, setCache } from "./cache"
+
 const FM_BASE = "https://api.finmindtrade.com/api/v4"
+const TTL = 5 * 60 * 1000 // 5 minutes
 
 // Optional: set your FinMind token in .env.local as NEXT_PUBLIC_FINMIND_TOKEN
 const TOKEN = process.env.NEXT_PUBLIC_FINMIND_TOKEN ?? ""
 
 async function fmFetch<T>(dataset: string, params: Record<string, string>): Promise<T[]> {
+  const cacheKey = `fm:${dataset}:${JSON.stringify(params)}`
+  const cached = getCached<T[]>(cacheKey)
+  if (cached) return cached
+
   const qs = new URLSearchParams({ dataset, ...params, ...(TOKEN ? { token: TOKEN } : {}) })
   const res = await fetch(`${FM_BASE}/data?${qs}`)
   if (!res.ok) throw new Error(`FinMind API error: ${res.status}`)
   const json = await res.json()
   if (json.status !== 200) throw new Error(json.msg ?? "FinMind error")
-  return json.data as T[]
+  const data = json.data as T[]
+  setCache(cacheKey, data, TTL)
+  return data
 }
 
 // ─── TWSE direct endpoints (no auth needed) ────────────────────────────────────
 const TWSE_BASE = "https://openapi.twse.com.tw/v1"
 
 async function twseFetch<T>(path: string): Promise<T[]> {
+  const cacheKey = `twse:${path}`
+  const cached = getCached<T[]>(cacheKey)
+  if (cached) return cached
+
   const res = await fetch(`${TWSE_BASE}${path}`)
   if (!res.ok) throw new Error(`TWSE API error: ${res.status}`)
-  return res.json() as Promise<T[]>
+  const data = await res.json() as T[]
+  setCache(cacheKey, data, TTL)
+  return data
 }
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
