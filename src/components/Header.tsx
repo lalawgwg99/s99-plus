@@ -1,19 +1,27 @@
 "use client"
 
-import { useState } from "react"
+import { useCallback } from "react"
+import { useRouter } from "next/navigation"
 import { Search, Sun, Moon } from "lucide-react"
 import { useDarkMode } from "@/hooks/useDarkMode"
 import SearchSheet from "@/components/SearchSheet"
+import { useState } from "react"
+import type { StockInfo } from "@/lib/api"
 
 export default function Header() {
   const { isDark, toggle } = useDarkMode()
   const [searchOpen, setSearchOpen] = useState(false)
+  const router = useRouter()
+
+  const handleSelect = useCallback((stock: StockInfo) => {
+    router.push(`/explore?stock=${stock.stock_id}`)
+  }, [router])
 
   return (
     <>
       <header className="fixed top-0 inset-x-0 z-40 h-14 bg-background/80 backdrop-blur-xl border-b border-border">
-        <div className="flex items-center justify-between h-full px-4 max-w-2xl mx-auto">
-          <span className="font-black text-base tracking-tight">StockMoat</span>
+        <div className="flex items-center justify-between h-full px-5 max-w-3xl mx-auto">
+          <span className="font-bold text-[17px] tracking-tight">StockMoat</span>
           <div className="flex items-center gap-1">
             <button
               onClick={() => setSearchOpen(true)}
@@ -32,7 +40,7 @@ export default function Header() {
           </div>
         </div>
       </header>
-      <SearchSheet open={searchOpen} onClose={() => setSearchOpen(false)} />
+      <SearchSheet open={searchOpen} onClose={() => setSearchOpen(false)} onSelect={handleSelect} />
     </>
   )
 }
